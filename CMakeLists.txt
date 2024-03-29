@@ -13,13 +13,13 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# find_package(GTest REQUIRED)
-# enable_testing()
+find_package(GTest REQUIRED)
+enable_testing()
 
 add_executable(Yadro_tape_task ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-#add_executable(Yadro_tape_task_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit_test/test.cpp)
+add_executable(Yadro_tape_task_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
 
-#target_link_libraries(Yadro_tape_task_test PRIVATE ${GTEST_LIBRARIES})
+target_link_libraries(Yadro_tape_task_test PRIVATE ${GTEST_LIBRARIES})
 
 target_include_directories(Yadro_tape_task PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-#target_include_directories(Yadro_tape_task_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(Yadro_tape_task_test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
