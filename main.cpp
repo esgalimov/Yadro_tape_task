@@ -1,6 +1,7 @@
 #include <iostream>
 #include "config.hpp"
 #include "tape.hpp"
+#include "sorter.hpp"
 #include <array>
 
 int main(int argc, char* argv[]) try {
