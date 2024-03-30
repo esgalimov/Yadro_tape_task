@@ -2,7 +2,8 @@
 #include "tape.hpp"
 #include "config.hpp"
 
-using ts = tape_sorter;
+namespace ts = tape_sorter;
+namespace cp = tape_sorter::config_parser;
 
 TEST(sigle_tape_methods_test, read_test) {
     std::string str = ts::read_to_binary("../tests/test1.in");
@@ -45,8 +46,18 @@ TEST(sigle_tape_methods_test, shift_next_test) {
     ASSERT_THROW(tp.shift_next(), std::runtime_error);
 }
 
+TEST(parse_config_test, test_1) {
+    cp::config_t cnfg = cp::parse_config();
+
+    ASSERT_EQ(100, cnfg.tape_sz_);
+    ASSERT_EQ(20, cnfg.ram_sz_);
+    ASSERT_EQ(2, cnfg.rw_tm_);
+    ASSERT_EQ(10, cnfg.rewind_tm_);
+    ASSERT_EQ(1, cnfg.shift_tm_);
+}
+
 int main(int argc, char **argv)
 {
-    ::testing::InitshiftogleTest(&argc, argv);
+    ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

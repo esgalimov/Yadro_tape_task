@@ -1,5 +1,5 @@
-tape_size       = 100
-ram_size        = 20
-read_write_time = 2
-rewind_time     = 10
-shift_time      = 1
+tape_size       100
+ram_size        20
+read_write_time 2
+rewind_time     10
+shift_time      1

@@ -16,8 +16,10 @@ endif()
 find_package(GTest REQUIRED)
 enable_testing()
 
-add_executable(Yadro_tape_task ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-add_executable(Yadro_tape_task_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
+add_executable(Yadro_tape_task ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+                               ${CMAKE_CURRENT_SOURCE_DIR}/source/config.cpp)
+add_executable(Yadro_tape_task_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/source/config.cpp)
 
 target_link_libraries(Yadro_tape_task_test PRIVATE ${GTEST_LIBRARIES})
 

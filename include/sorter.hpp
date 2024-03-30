@@ -3,6 +3,7 @@
 #include <vector>
 
 namespace tape_sorter {
+    using cp = config_parser;
 namespace sorter {
     template <typename T = int>
         requires std::is_arithmetic_v<T>
@@ -14,12 +15,15 @@ namespace sorter {
 
         std::array<tape_t, 2> tmp_tapes_;
 
+        cp::config_t config_;
+
     public:
-        sorter(std::size_t ram_sz, const std::string& iname, 
-                                   const std::string& oname) :
-            itape_(iname), otape_(oname) {
-                ram_.reserve(ram_sz);
+        sorter(const std::string& iname, const std::string& oname, config_t config) :
+            itape_(iname, config.tape_sz_), otape_(oname, config.tape_sz_), config_(config) {
+                ram_.reserve(config_.ram_sz_);
         }
+
+        void load_tape();
     };
 } //<-- namespace sorter
 } //<-- namespace tape_sorter

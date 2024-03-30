@@ -4,7 +4,7 @@
 #include <array>
 
 int main(int argc, char* argv[]) try {
-    std::string str = read_to_binary("../tests/test1.in");
+    std::string str = tape_sorter::read_to_binary("../tests/test1.in");
     std::cout << str << std::endl;
     tape_sorter::tape::tape_t tp{str, 40};
 
