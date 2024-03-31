@@ -18,7 +18,7 @@ struct config_t
 };
 
 //! @brief Parse config.txt file from source dir and return config struct
-config_t parse_config();
+config_t parse_config(const std::string& filename = "config.txt");
 
 //! @brief Parse number from stream and return it (to use in parse_config function)
 std::size_t parse_number(std::ifstream& input);
@@ -34,6 +34,6 @@ std::string read_to_binary(const std::string& filename);
 std::string get_output_bin(const std::string& filename);
 
 //! @brief Write from output tape binary file to "human-readable" file
-void write_output_numan_readable(const std::string& filename);
+void write_output_numan_readable(const std::string& iname, const std::string& oname);
 
 } // <-- namespace tape_sorter

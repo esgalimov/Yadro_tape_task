@@ -1,5 +1,5 @@
-tape_size       104
-ram_size        25
+tape_size       180
+ram_size        40
 read_write_time 2
 rewind_time     10
 shift_time      1

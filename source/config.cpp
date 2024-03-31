@@ -5,9 +5,14 @@ namespace tape_sorter {
 
 namespace config_parser {
 
-config_t parse_config() {
-    auto src_folder = std::filesystem::absolute(__FILE__).parent_path().parent_path();
-    std::ifstream input{src_folder.append("config.txt").string()};
+config_t parse_config(const std::string& filename) {
+    std::ifstream input;
+
+    if (filename == "config.txt") {
+        auto src_folder = std::filesystem::absolute(__FILE__).parent_path().parent_path();
+        input.open(src_folder.append("config.txt").string());
+    }
+    else input.open(filename);
 
     config_t config{};
     std::string str;
@@ -62,14 +67,14 @@ std::string get_output_bin(const std::string& filename) {
     return bin_path;
 }
 
-void write_output_numan_readable(const std::string& filename) {
-    std::ifstream input{get_output_bin(filename), std::ios::binary};
-    std::ofstream output{filename};
+void write_output_numan_readable(const std::string& iname, const std::string& oname) {
+    std::ifstream input{iname, std::ios::binary};
+    std::ofstream output{oname};
 
     int num = 0, sz = sizeof(int);
 
     if (input.is_open() && output.is_open()) {
-        if (input.read(reinterpret_cast<char*>(&num), sz))
+        while (input.read(reinterpret_cast<char*>(&num), sz))
             output << num << " ";
     }
     else throw std::runtime_error(

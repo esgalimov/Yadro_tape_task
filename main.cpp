@@ -2,20 +2,39 @@
 #include "config.hpp"
 #include "tape.hpp"
 #include "sorter.hpp"
-#include <array>
 
 namespace ts  = tape_sorter;
 namespace tss = tape_sorter::sorter;
 namespace cp  = tape_sorter::config_parser;
 
+namespace tape_flags {
+    const std::string bin_mode = "-b";
+}
+
 int main(int argc, char* argv[]) try {
-    cp::config_t config = cp::parse_config();
-    std::string input  = ts::read_to_binary("../tests/test3.in"),
-                output = ts::get_output_bin("../tests/test3.out");
-    std::cout << output << std::endl;
-    tss::sorter_t sorter{input, output, config};
-    sorter.sort();
-    //ts::write_output_numan_readable("../tests/test3.out");
+    if (argc < 3) {
+        std::cerr << "Error: too few arguments" << std::endl;
+        return 1;
+    }
+    std::string input, output;
+
+    if (argc >= 4 && argv[1] == tape_flags::bin_mode) {
+        input = argv[2];
+        output = argv[3];
+    }
+    else {
+        input  = ts::read_to_binary(argv[1]);
+        output = ts::get_output_bin(argv[2]);
+    }
+
+    tss::sorter_t sorter{input, output, cp::parse_config()};
+    std::time_t total_time = sorter.sort();
+
+    std::cout << "Total sorting time: " << total_time << std::endl;
+
+    if (argv[1] != tape_flags::bin_mode) {
+        ts::write_output_numan_readable(output, argv[2]);
+    }
 }
 catch (std::exception& exc) {
     std::cerr << "Somethig wrong: " << exc.what() << std::endl;
