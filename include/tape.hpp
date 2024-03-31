@@ -35,6 +35,8 @@ namespace tape {
         using tape_buffer_t<T>::file_;
         using tape_buffer_t<T>::sz_;
         static constexpr int T_sz_ = sizeof(T);
+
+        std::size_t pos = 0;
         
     public:
         tape_t() = default;
@@ -64,22 +66,30 @@ namespace tape {
         }
 
         void shift_next() {
-            if (end_of_tape()) file_.seekg(T_sz_, std::ios_base::cur);
+            if (!is_end()) file_.seekg(T_sz_, std::ios_base::cur);
             else throw std::runtime_error(
                 "Error: tape cannot shift next, magnetic head is at the end of tape");
         }
 
         void shift_prev() {
-            if (begin_of_tape()) file_.seekg(-T_sz_, std::ios_base::cur);
+            if (!is_begin()) file_.seekg(-T_sz_, std::ios_base::cur);
             else throw std::runtime_error(
                 "Error: tape cannot shift prev, magnetic head is at the beginning of tape");
         }
 
         std::size_t size() { return sz_; }
 
-        std::size_t pos()  { return file_.tellg() / T_sz_; }
+        void save_pos()  { pos = file_.tellg() / T_sz_; }
 
-        bool is_end()   { return file_.tellg() >= sz_ - T_sz_; }
+        bool check_pos() { return pos == file_.tellg() / T_sz_; }
+
+        std::size_t get_pos() { return file_.tellg() / T_sz_; }
+        bool fail() { return file_.fail(); }
+
+        bool is_end()   { 
+            //std::cout << "is_end = " << file_.tellg() << " " << sz_ - T_sz_ << std::endl;
+            return file_.tellg() >= sz_ - T_sz_; 
+        }
         bool is_begin() { return file_.tellg() == 0; }
     };
    

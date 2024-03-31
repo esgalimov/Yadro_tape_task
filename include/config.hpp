@@ -30,4 +30,10 @@ std::size_t parse_number(std::ifstream& input);
 //! @return сreated binary file name
 std::string read_to_binary(const std::string& filename);
 
+//! @brief Function return binary output file name
+std::string get_output_bin(const std::string& filename);
+
+//! @brief Write from output tape binary file to "human-readable" file
+void write_output_numan_readable(const std::string& filename);
+
 } // <-- namespace tape_sorter

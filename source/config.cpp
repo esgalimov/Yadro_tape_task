@@ -36,7 +36,7 @@ std::size_t parse_number(std::ifstream& input) {
 
 std::string read_to_binary(const std::string& filename) {
     std::filesystem::path src_path{filename};
-    std::string bin_path = src_path.replace_extension(".bin").string();
+    std::string bin_path = src_path.replace_extension("in.bin").string();
 
     std::ifstream input{filename};
     std::ofstream output{bin_path, std::ios::binary};
@@ -51,5 +51,28 @@ std::string read_to_binary(const std::string& filename) {
         "Error: cannot read ints to binary file, input or(and) output failed to open");
     
     return bin_path;
+}
+
+std::string get_output_bin(const std::string& filename) {
+    std::filesystem::path src_path{filename};
+    std::string bin_path = src_path.replace_extension("out.bin").string();
+
+    std::ofstream output{bin_path, std::ios::binary};
+
+    return bin_path;
+}
+
+void write_output_numan_readable(const std::string& filename) {
+    std::ifstream input{get_output_bin(filename), std::ios::binary};
+    std::ofstream output{filename};
+
+    int num = 0, sz = sizeof(int);
+
+    if (input.is_open() && output.is_open()) {
+        if (input.read(reinterpret_cast<char*>(&num), sz))
+            output << num << " ";
+    }
+    else throw std::runtime_error(
+        "Error: cannot write ints to human-readble file, input or(and) output failed to open");
 }
 } // <-- namespace tape_sorter
