@@ -1,25 +1,20 @@
 #include "config.hpp"
 #include <iostream>
+#include <limits>
+#include <random>
 
 namespace tape_sorter {
 
 namespace config_parser {
 
 config_t parse_config(const std::string& filename) {
-    std::ifstream input;
-
-    if (filename == "config.txt") {
-        auto src_folder = std::filesystem::absolute(__FILE__).parent_path().parent_path();
-        input.open(src_folder.append("config.txt").string());
-    }
-    else input.open(filename);
+    std::ifstream input{filename};
 
     config_t config{};
     std::string str;
 
     while (input >> str) {
-        if      (str == "tape_size")       config.tape_sz_   = parse_number(input);
-        else if (str == "ram_size")        config.ram_sz_    = parse_number(input);
+        if      (str == "ram_size")        config.ram_sz_    = parse_number(input);
         else if (str == "read_write_time") config.rw_tm_     = parse_number(input);
         else if (str == "rewind_time")     config.rewind_tm_ = parse_number(input);
         else if (str == "shift_time")      config.shift_tm_  = parse_number(input);
@@ -79,5 +74,14 @@ void write_output_numan_readable(const std::string& iname, const std::string& on
     }
     else throw std::runtime_error(
         "Error: cannot write ints to human-readble file, input or(and) output failed to open");
+}
+
+std::string unique_tmp_filename_generator(int index) {
+    std::random_device rd;  
+    std::mt19937 gen(rd()); 
+    std::uniform_int_distribution<> distrib(std::numeric_limits<int>::min(), 
+                                            std::numeric_limits<int>::max());
+    
+    return std::to_string(index) + std::string{"tape_task"} + std::to_string(distrib(gen));
 }
 } // <-- namespace tape_sorter

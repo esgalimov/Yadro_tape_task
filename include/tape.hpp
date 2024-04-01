@@ -17,12 +17,15 @@ namespace tape {
 
         tape_t(const std::string& filename, std::size_t sz) : 
             file_(filename, std::ios::binary | std::ios::in | std::ios::out),
-            sz_(sz + T_sz_ - sz % T_sz_) {}
+            sz_( sz + T_sz_ - sz % T_sz_) {
+                //file_.exceptions(std::fstream::failbit | std::fstream::badbit);
+        }
 
         void init_stream(const std::string& filename, std::size_t sz) {
             file_.close();
             file_.open(filename, std::ios::binary | std::ios::in | 
                                  std::ios::out | std::ios::trunc);
+            //file_.exceptions(std::fstream::failbit | std::fstream::badbit);
             sz_ = sz + T_sz_ - sz % T_sz_;
         }
 
@@ -62,6 +65,7 @@ namespace tape {
         bool check_pos() { return pos == file_.tellg() / T_sz_; }
 
         std::size_t get_pos() { return file_.tellg() / T_sz_; }
+        std::size_t get_saved_pos() { return pos; }
         bool fail() { return file_.fail(); }
 
         bool is_end()   { return file_.tellg() >= sz_ - T_sz_; }

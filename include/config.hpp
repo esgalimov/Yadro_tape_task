@@ -18,13 +18,16 @@ struct config_t
 };
 
 //! @brief Parse config.txt file from source dir and return config struct
-config_t parse_config(const std::string& filename = "config.txt");
+config_t parse_config(const std::string& filename);
 
 //! @brief Parse number from stream and return it (to use in parse_config function)
 std::size_t parse_number(std::ifstream& input);
 
 } // <--- namespace config_parser
 
+namespace sort_flags {
+    constexpr std::string_view bin_mode = "-b";
+}
 
 //! @brief Function reads integers from "human-readable" file into binary file
 //! @return сreated binary file name
@@ -35,5 +38,7 @@ std::string get_output_bin(const std::string& filename);
 
 //! @brief Write from output tape binary file to "human-readable" file
 void write_output_numan_readable(const std::string& iname, const std::string& oname);
+
+std::string unique_tmp_filename_generator(int index = 0);
 
 } // <-- namespace tape_sorter
