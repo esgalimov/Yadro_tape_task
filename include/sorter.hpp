@@ -146,12 +146,12 @@ namespace sorter {
             itape_(iname, config.tape_sz_), otape_(oname, config.tape_sz_),
             rw_tm_(config.rw_tm_), rewind_tm_(config.rewind_tm_), shift_tm_(config.shift_tm_) 
         {
-                ram_.resize(config.ram_sz_ / sizeof(T));
+            ram_.resize(config.ram_sz_ / sizeof(T));
 
-                auto tmp_path = std::filesystem::temp_directory_path();
+            auto tmp_path = std::filesystem::temp_directory_path();
 
-                tmp_tp_1_.init_stream(tmp_path / "tape_task_tmp_1.bin", config.tape_sz_);
-                tmp_tp_2_.init_stream(tmp_path / "tape_task_tmp_2.bin", config.tape_sz_);
+            tmp_tp_1_.init_stream(tmp_path / "tape_task_tmp_1.bin", config.tape_sz_);
+            tmp_tp_2_.init_stream(tmp_path / "tape_task_tmp_2.bin", config.tape_sz_);
         }
 
         std::time_t sort() {

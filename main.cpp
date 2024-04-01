@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) try {
     if (argc >= 4 && argv[1] == tape_flags::bin_mode) {
         input = argv[2];
         output = argv[3];
+        std::ofstream{output};
     }
     else {
         input  = ts::read_to_binary(argv[1]);
