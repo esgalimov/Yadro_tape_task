@@ -62,30 +62,6 @@ namespace sorter {
             
             tmp_tp_1_.save_pos();
             tmp_tp_2_.save_pos();
-
-            //---------------
-            std::cout << "tmp1:" << "size = " << tmp_tp_1_.size() << std::endl;
-            tmp_tp_1_.rewind_begin();
-            while (!tmp_tp_1_.check_pos()) {
-                std::cout << tmp_tp_1_.read() << " ";
-                //std::cout << tmp_tp_1_.fail() << " ";
-                tmp_tp_1_.shift_next();
-            }
-            //tmp_tp_1_.rewind_begin();
-
-            std::cout << std::endl;
-
-            std::cout << "tmp2:" << "size = " << tmp_tp_2_.size() << std::endl;
-            tmp_tp_2_.rewind_begin();
-            while (!tmp_tp_2_.check_pos()) {
-                std::cout << tmp_tp_2_.read() << " ";
-                tmp_tp_2_.shift_next();
-            }
-            //tmp_tp_2_.rewind_begin();
-
-            std::cout << std::endl;
-
-            //--------------
         }
 
         void sort_little_tape_in_ram() {
@@ -106,54 +82,43 @@ namespace sorter {
                 T curr_val1 = tmp_tp_1_.read(), curr_val2 = tmp_tp_2_.read(),
                   prev_val1 = curr_val1,        prev_val2 = curr_val2;
 
-                  std::cout << "guard5" << std::endl;
-                
                 while (!tmp_tp_1_.check_pos() && !tmp_tp_2_.check_pos() && 
                         prev_val1 <= curr_val1 && prev_val2 <= curr_val2) {
-                            std::cout << "guard6" << std::endl;
-                            std::cout << "tmp2fail = " << tmp_tp_2_.fail() << std::endl;
-                    if (curr_val1 <= curr_val2) {
-                        std::cout << "guard7" << std::endl;
+                            
+                    if (curr_val1 < curr_val2) {
                         otape_.write(curr_val1);
                         tmp_tp_1_.shift_next();
-                        prev_val1 = curr_val1;
-                        curr_val1 = tmp_tp_1_.read();
-                        std::cout << "guard8" << std::endl;
+                        if (!tmp_tp_1_.check_pos()) {
+                            prev_val1 = curr_val1;
+                            curr_val1 = tmp_tp_1_.read();
+                        }
                     }
                     else {
-                        std::cout << "tmp2fail = " << tmp_tp_2_.fail() << std::endl;
-                        std::cout << "guard9" << std::endl;
                         otape_.write(curr_val2);
-                        std::cout << "saved pos = " << tmp_tp_2_.get_saved_pos() << std::endl;
-                        std::cout << "      pos = " << tmp_tp_2_.get_pos() << std::endl;
                         tmp_tp_2_.shift_next();
-                        prev_val2 = curr_val2;
-                        curr_val2 = tmp_tp_2_.read();
-                        std::cout << "guard10" << std::endl;
+                        if (!tmp_tp_2_.check_pos()) {
+                            prev_val2 = curr_val2;
+                            curr_val2 = tmp_tp_2_.read();
+                        }
                     }
-                    std::cout << "tmp2fail = " << tmp_tp_2_.fail() << std::endl;
-                    std::cout << "guard11" << std::endl;
                     otape_.shift_next();
-                    std::cout << "guard1" << std::endl;
                 }
                 while (!tmp_tp_1_.check_pos() && prev_val1 <= curr_val1) {
                     otape_.write(curr_val1);
-                    tmp_tp_1_.shift_next();
-                    prev_val1 = curr_val1;
-                    curr_val1 = tmp_tp_2_.read();
                     otape_.shift_next();
-                    std::cout << "guard2" << std::endl;
+                    tmp_tp_1_.shift_next();
+                    if (tmp_tp_1_.check_pos()) break;
+                    prev_val1 = curr_val1;
+                    curr_val1 = tmp_tp_1_.read();
                 }
                 while (!tmp_tp_2_.check_pos() && prev_val2 <= curr_val2) {
                     otape_.write(curr_val2);
+                    otape_.shift_next();
                     tmp_tp_2_.shift_next();
+                    if (tmp_tp_2_.check_pos()) break;
                     prev_val2 = curr_val2;
                     curr_val2 = tmp_tp_2_.read();
-                    otape_.shift_next();
-                    std::cout << "guard3" << std::endl;
                 }
-                std::cout << "guard4" << std::endl;
-                std::cout << "tmp2fail = " << tmp_tp_2_.fail() << std::endl;
             }
 
             while (!tmp_tp_1_.check_pos()) {
@@ -161,28 +126,13 @@ namespace sorter {
                 otape_.write(val1);
                 tmp_tp_1_.shift_next();
                 otape_.shift_next();
-                std::cout << "guard5" << std::endl;
             }
-
             while (!tmp_tp_2_.check_pos()) {
                 T val2 = tmp_tp_2_.read();
                 otape_.write(val2);
                 tmp_tp_2_.shift_next();
                 otape_.shift_next();
-                std::cout << "guard5" << std::endl;
             }
-
-            //---------------
-            std::cout << "otape:" << std::endl;
-            otape_.rewind_begin();
-            while (!otape_.is_end()) {
-                std::cout << otape_.read() << " ";
-                otape_.shift_next();
-            }
-            otape_.rewind_begin();
-            std::cout << std::endl;
-
-            //--------------
 
             sort_time_ += 3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_);
         }
@@ -221,31 +171,6 @@ namespace sorter {
             tmp_tp_2_.save_pos();
 
             sort_time_ += 3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_);
-
-             //---------------
-            std::cout << "tmp1:" << "size = " << tmp_tp_1_.size() << std::endl;
-            tmp_tp_1_.rewind_begin();
-            while (!tmp_tp_1_.check_pos()) {
-                std::cout << tmp_tp_1_.read() << " ";
-                //std::cout << tmp_tp_1_.fail() << " ";
-                tmp_tp_1_.shift_next();
-            }
-            //tmp_tp_1_.rewind_begin();
-
-            std::cout << std::endl;
-
-            std::cout << "tmp2:" << "size = " << tmp_tp_2_.size() << std::endl;
-            tmp_tp_2_.rewind_begin();
-            while (!tmp_tp_2_.check_pos()) {
-                std::cout << tmp_tp_2_.read() << " ";
-                tmp_tp_2_.shift_next();
-            }
-            //tmp_tp_2_.rewind_begin();
-
-            std::cout << std::endl;
-
-            //--------------
-
         }
 
     public:
