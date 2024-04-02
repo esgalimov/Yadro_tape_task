@@ -28,7 +28,6 @@ int main(int argc, char* argv[]) try {
     config_path.append("config.txt");
 
     cp::config_t config = cp::parse_config(config_path);
-    config.tape_sz_ = std::filesystem::file_size(input);
 
     tss::sorter_t sorter{input, output, config};
     std::time_t total_time = sorter.sort();

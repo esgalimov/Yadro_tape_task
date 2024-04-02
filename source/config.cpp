@@ -2,6 +2,7 @@
 #include <iostream>
 #include <limits>
 #include <random>
+#include "exceptions.hpp"
 
 namespace tape_sorter {
 
@@ -19,7 +20,7 @@ config_t parse_config(const std::string& filename) {
         else if (str == "rewind_time")     config.rewind_tm_ = parse_number(input);
         else if (str == "shift_time")      config.shift_tm_  = parse_number(input);
 
-        else throw std::runtime_error("Error: undefind symbols in config file");
+        else throw tape_sorter_exceptions::config_undefind_symbols();
     }
     return config;
 }
@@ -29,7 +30,7 @@ std::size_t parse_number(std::ifstream& input) {
 
     if (input >> num) return num;
 
-    else throw std::runtime_error("Error: cannot parse number from config file");
+    else throw tape_sorter_exceptions::config_number_parsing();
 }
 } // <--- namespace config_parser
 
@@ -47,8 +48,7 @@ std::string read_to_binary(const std::string& filename) {
         while (input >> num)
             output.write(reinterpret_cast<char*>(&num), sz);
     }
-    else throw std::runtime_error(
-        "Error: cannot read ints to binary file, input or(and) output failed to open");
+    else throw tape_sorter_exceptions::reading_to_binary();
     
     return bin_path;
 }

@@ -6,22 +6,25 @@
 namespace tape_sorter {
     namespace cp = config_parser;
 namespace sorter {
-    constexpr std::string_view tmp_filename_1 = "tape_task_tmp_1.bin",
-                               tmp_filename_2 = "tape_task_tmp_2.bin";
-
     using namespace tape;
     template <typename T = int>
         requires std::is_arithmetic_v<T>
     class sorter_t final {
         tape::tape_t<T> itape_, otape_, tmp_tp_1_, tmp_tp_2_;
 
+        std::string tmp_filename_1, tmp_filename_2;
+
         std::vector<T> ram_;
 
-        const std::time_t rw_tm_, rewind_tm_ , shift_tm_;
+        std::time_t rw_tm_, rewind_tm_, shift_tm_;
 
         std::time_t sort_time_ = 0;
 
         using ram_iter = typename std::vector<T>::iterator;
+
+        void add_time(std::time_t tm) {
+            sort_time_ += tm;
+        }
 
         ram_iter load_tape_into_ram(tape::tape_t<T>& tp, ram_iter start, ram_iter end) {
             while (start != end && start != ram_.end() && !tp.is_end()) {
@@ -30,7 +33,7 @@ namespace sorter {
                 start++;
             }
 
-            sort_time_ += (start - ram_.begin()) * (rw_tm_ + shift_tm_);
+            add_time((start - ram_.begin()) * (rw_tm_ + shift_tm_));
 
             return start;
         }
@@ -42,7 +45,7 @@ namespace sorter {
                 start++;
             }
 
-            sort_time_ += (start - ram_.begin()) * (rw_tm_ + shift_tm_);
+            add_time((start - ram_.begin()) * (rw_tm_ + shift_tm_));
 
             return start;
         }
@@ -72,55 +75,28 @@ namespace sorter {
             load_ram_into_tape(otape_, ram_.begin(), last_loaded);
         }
 
-        void merge_tmps() {
-            otape_.rewind_begin();
-            tmp_tp_1_.rewind_begin();
-            tmp_tp_2_.rewind_begin();
-
-            while (!tmp_tp_1_.check_pos() && !tmp_tp_2_.check_pos()) {
-
-                T curr_val1 = tmp_tp_1_.read(), curr_val2 = tmp_tp_2_.read(),
-                  prev_val1 = curr_val1,        prev_val2 = curr_val2;
-
-                while (!tmp_tp_1_.check_pos() && !tmp_tp_2_.check_pos() && 
-                        prev_val1 <= curr_val1 && prev_val2 <= curr_val2) {
-                            
-                    if (curr_val1 < curr_val2) {
-                        otape_.write(curr_val1);
-                        tmp_tp_1_.shift_next();
-                        if (!tmp_tp_1_.check_pos()) {
-                            prev_val1 = curr_val1;
-                            curr_val1 = tmp_tp_1_.read();
-                        }
-                    }
-                    else {
-                        otape_.write(curr_val2);
-                        tmp_tp_2_.shift_next();
-                        if (!tmp_tp_2_.check_pos()) {
-                            prev_val2 = curr_val2;
-                            curr_val2 = tmp_tp_2_.read();
-                        }
-                    }
-                    otape_.shift_next();
-                }
-                while (!tmp_tp_1_.check_pos() && prev_val1 <= curr_val1) {
+        void merge_while_sorted_subarrays(T& prev_val1, T& curr_val1, 
+                                          T& prev_val2, T& curr_val2) {
+            while (!tmp_tp_1_.check_pos() && prev_val1 <= curr_val1) {
                     otape_.write(curr_val1);
                     otape_.shift_next();
                     tmp_tp_1_.shift_next();
                     if (tmp_tp_1_.check_pos()) break;
                     prev_val1 = curr_val1;
                     curr_val1 = tmp_tp_1_.read();
-                }
-                while (!tmp_tp_2_.check_pos() && prev_val2 <= curr_val2) {
-                    otape_.write(curr_val2);
-                    otape_.shift_next();
-                    tmp_tp_2_.shift_next();
-                    if (tmp_tp_2_.check_pos()) break;
-                    prev_val2 = curr_val2;
-                    curr_val2 = tmp_tp_2_.read();
-                }
             }
 
+            while (!tmp_tp_2_.check_pos() && prev_val2 <= curr_val2) {
+                otape_.write(curr_val2);
+                otape_.shift_next();
+                tmp_tp_2_.shift_next();
+                if (tmp_tp_2_.check_pos()) break;
+                prev_val2 = curr_val2;
+                curr_val2 = tmp_tp_2_.read();
+            }
+        }
+
+        void merge_tapes_end() {
             while (!tmp_tp_1_.check_pos()) {
                 T val1 = tmp_tp_1_.read();
                 otape_.write(val1);
@@ -133,8 +109,51 @@ namespace sorter {
                 tmp_tp_2_.shift_next();
                 otape_.shift_next();
             }
+        }
 
-            sort_time_ += 3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_);
+        void single_merge(T& prev_val1, T& curr_val1, 
+                          T& prev_val2, T& curr_val2) {
+            if (curr_val1 < curr_val2) {
+                otape_.write(curr_val1);
+                tmp_tp_1_.shift_next();
+                if (!tmp_tp_1_.check_pos()) {
+                    prev_val1 = curr_val1;
+                    curr_val1 = tmp_tp_1_.read();
+                }
+            }
+            else {
+                otape_.write(curr_val2);
+                tmp_tp_2_.shift_next();
+                if (!tmp_tp_2_.check_pos()) {
+                    prev_val2 = curr_val2;
+                    curr_val2 = tmp_tp_2_.read();
+                }
+            }
+            otape_.shift_next();
+        }
+
+        void merge_tmps() {
+            otape_.rewind_begin();
+            tmp_tp_1_.rewind_begin();
+            tmp_tp_2_.rewind_begin();
+
+            T curr_val1 = tmp_tp_1_.read(), curr_val2 = tmp_tp_2_.read();
+
+            while (!tmp_tp_1_.check_pos() && !tmp_tp_2_.check_pos()) {
+
+                T prev_val1 = curr_val1, prev_val2 = curr_val2;
+
+                while (!tmp_tp_1_.check_pos() && !tmp_tp_2_.check_pos() && 
+                        prev_val1 <= curr_val1 && prev_val2 <= curr_val2) {
+                            
+                    single_merge(prev_val1, curr_val1, prev_val2, curr_val2);
+                }
+                merge_while_sorted_subarrays(prev_val1, curr_val1, prev_val2, curr_val2);
+            }
+
+            merge_tapes_end();
+
+            add_time(3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_));
         }
 
         void load_merged_into_tmps() {
@@ -170,20 +189,58 @@ namespace sorter {
             tmp_tp_1_.save_pos();
             tmp_tp_2_.save_pos();
 
-            sort_time_ += 3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_);
+            add_time(3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_));
+        }
+
+        void generate_tmp_filenames() {
+            tmp_filename_1 = unique_tmp_filename_generator(1);
+            tmp_filename_2 = unique_tmp_filename_generator(2);
         }
 
     public:
         sorter_t(const std::string& iname, const std::string& oname, cp::config_t config) :
-            itape_(iname, config.tape_sz_), otape_(oname, config.tape_sz_),
             rw_tm_(config.rw_tm_), rewind_tm_(config.rewind_tm_), shift_tm_(config.shift_tm_) 
         {
             ram_.resize(config.ram_sz_ / sizeof(T));
 
-            auto tmp_path = std::filesystem::temp_directory_path();
+            std::size_t tape_sz = std::filesystem::file_size(iname);
 
-            tmp_tp_1_.init_stream(tmp_path / tmp_filename_1, config.tape_sz_);
-            tmp_tp_2_.init_stream(tmp_path / tmp_filename_2, config.tape_sz_);
+            itape_.init_stream(iname, tape_sz, false);
+            otape_.init_stream(oname, tape_sz, false);
+
+            std::cout << itape_.fail() << otape_.fail() << std::endl;
+
+            auto tmp_path = std::filesystem::temp_directory_path();
+            generate_tmp_filenames();
+
+            tmp_tp_1_.init_stream(tmp_path / tmp_filename_1, tape_sz);
+            tmp_tp_2_.init_stream(tmp_path / tmp_filename_2, tape_sz);
+        }
+
+        ~sorter_t() {
+            auto tmp_path = std::filesystem::temp_directory_path();
+            std::filesystem::remove(tmp_path / tmp_filename_1);
+            std::filesystem::remove(tmp_path / tmp_filename_2);
+        }
+
+        sorter_t(const sorter_t& sorter)            = delete;
+        sorter_t& operator=(const sorter_t& sorter) = delete;
+
+        sorter_t(sorter_t&& sorter)            = default;
+        sorter_t& operator=(sorter_t&& sorter) = default;
+
+        void set_files(const std::string& iname, const std::string& oname) {
+            std::size_t tape_sz = std::filesystem::file_size(iname);
+
+            itape_.init_stream(iname, tape_sz, false);
+            otape_.init_stream(oname, tape_sz, false);
+        }
+
+        void set_config(cp::config_t config) {
+            ram_.resize(config.ram_sz_ / sizeof(T));
+            rw_tm_     = config.rw_tm_;
+            rewind_tm_ = config.rewind_tm_; 
+            shift_tm_  = config.shift_tm_;
         }
 
         std::time_t sort() {

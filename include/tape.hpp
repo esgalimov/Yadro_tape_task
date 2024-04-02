@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include "exceptions.hpp"
 
 namespace tape_sorter {
 namespace tape {
@@ -18,14 +19,17 @@ namespace tape {
         tape_t(const std::string& filename, std::size_t sz) : 
             file_(filename, std::ios::binary | std::ios::in | std::ios::out),
             sz_( sz + T_sz_ - sz % T_sz_) {
-                //file_.exceptions(std::fstream::failbit | std::fstream::badbit);
+                file_.exceptions(std::fstream::failbit | std::fstream::badbit);
         }
 
-        void init_stream(const std::string& filename, std::size_t sz) {
+        void init_stream(const std::string& filename, std::size_t sz, bool trunc = true) {
             file_.close();
-            file_.open(filename, std::ios::binary | std::ios::in | 
-                                 std::ios::out | std::ios::trunc);
-            //file_.exceptions(std::fstream::failbit | std::fstream::badbit);
+
+            std::ios_base::openmode opmode = std::ios::binary | std::ios::in | std::ios::out;
+            if (trunc) opmode |= std::ios::trunc;
+
+            file_.open(filename, opmode);
+            file_.exceptions(std::fstream::failbit | std::fstream::badbit);
             sz_ = sz + T_sz_ - sz % T_sz_;
         }
 
@@ -48,14 +52,12 @@ namespace tape {
 
         void shift_next() {
             if (!is_end()) file_.seekg(T_sz_, std::ios_base::cur);
-            else throw std::runtime_error(
-                "Error: tape cannot shift next, magnetic head is at the end of tape");
+            else throw tape_sorter_exceptions::shift_next();
         }
 
         void shift_prev() {
             if (!is_begin()) file_.seekg(-T_sz_, std::ios_base::cur);
-            else throw std::runtime_error(
-                "Error: tape cannot shift prev, magnetic head is at the beginning of tape");
+            else throw tape_sorter_exceptions::shift_prev();
         }
 
         std::size_t size() { return sz_; }
