@@ -25,8 +25,9 @@ std::size_t parse_number(std::ifstream& input);
 
 } // <--- namespace config_parser
 
-namespace sort_flags {
-    constexpr std::string_view bin_mode = "-b";
+namespace parameters {
+    constexpr std::string_view bin_mode       = "-b",
+                               default_config = "config.txt";
 }
 
 //! @brief Function reads integers from "human-readable" file into binary file

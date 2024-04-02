@@ -26,4 +26,12 @@ namespace tape_sorter_exceptions {
     struct shift_prev : public std::runtime_error {
         shift_prev() : std::runtime_error("Tape cannot shift prev, magnetic head is at the beginning of tape") {}
     };
+
+    struct config_values : public std::runtime_error {
+        config_values() : std::runtime_error("Bad ram size or times in config") {}
+    };
+
+    struct ram_size : public std::runtime_error {
+        ram_size() : std::runtime_error("Ram too small") {}
+    };
 }

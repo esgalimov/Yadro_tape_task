@@ -1,0 +1,4 @@
+ram_size        40000
+read_write_time 1
+rewind_time     10
+shift_time      2

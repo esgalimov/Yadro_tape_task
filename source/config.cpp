@@ -26,9 +26,11 @@ config_t parse_config(const std::string& filename) {
 }
 
 std::size_t parse_number(std::ifstream& input) {
-    std::size_t num = 0;
+    long long num = 0;
 
-    if (input >> num) return num;
+    if (input >> num) 
+        if (num < 0) throw tape_sorter_exceptions::config_values();
+        else return num;
 
     else throw tape_sorter_exceptions::config_number_parsing();
 }
@@ -70,7 +72,7 @@ void write_output_numan_readable(const std::string& iname, const std::string& on
 
     if (input.is_open() && output.is_open()) {
         while (input.read(reinterpret_cast<char*>(&num), sz))
-            output << num << " ";
+            output << num << std::endl;
     }
     else throw std::runtime_error(
         "Error: cannot write ints to human-readble file, input or(and) output failed to open");

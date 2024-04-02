@@ -203,12 +203,12 @@ namespace sorter {
         {
             ram_.resize(config.ram_sz_ / sizeof(T));
 
+            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size();
+
             std::size_t tape_sz = std::filesystem::file_size(iname);
 
             itape_.init_stream(iname, tape_sz, false);
             otape_.init_stream(oname, tape_sz, false);
-
-            std::cout << itape_.fail() << otape_.fail() << std::endl;
 
             auto tmp_path = std::filesystem::temp_directory_path();
             generate_tmp_filenames();
@@ -238,13 +238,20 @@ namespace sorter {
 
         void set_config(cp::config_t config) {
             ram_.resize(config.ram_sz_ / sizeof(T));
+
+            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size();
+            
             rw_tm_     = config.rw_tm_;
             rewind_tm_ = config.rewind_tm_; 
             shift_tm_  = config.shift_tm_;
         }
 
         std::time_t sort() {
-            if (itape_.size() < ram_.size()) 
+            sort_time_ = 0;
+
+            if (itape_.size() <= 4) return sort_time_;
+
+            else if (itape_.size() < ram_.size()) 
                 sort_little_tape_in_ram();
 
             else {
