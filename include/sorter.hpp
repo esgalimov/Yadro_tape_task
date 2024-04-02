@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdio>
+#include <filesystem>
 #include "tape.hpp"
 
 namespace tape_sorter {
@@ -169,7 +170,7 @@ namespace sorter {
                     tmp_tp_1_.shift_next();
                     otape_.shift_next();
                     prev_val = curr_val;
-                    
+
                     if (otape_.is_end()) break;
                     curr_val = otape_.read();
                 } while (curr_val >= prev_val);

@@ -7,7 +7,7 @@ namespace ts  = tape_sorter;
 namespace tss = tape_sorter::sorter;
 namespace cp  = tape_sorter::config_parser;
 
-int main(int argc, char* argv[]) try {    
+int main(int argc, char* argv[]) try {
     if (argc < 3 || argc > 5) {
         std::cerr << "Error: wrong arguments number" << std::endl;
         return 1;
