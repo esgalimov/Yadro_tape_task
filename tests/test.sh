@@ -2,13 +2,13 @@ project_dir=$(dirname "$(realpath $0)")/..
 
 obj=${project_dir}/build/Yadro_tape_task
 
-test_folder=${project_dir}/tests/unit/
+test_folder=${project_dir}/tests/sort_test/
 
 echo "UNIT TESTS:"
 echo
 for ((i = 0; i <= 11; i++)) do
     echo test $i
-    ${obj} ${test_folder}$i/$i.in ${test_folder}$i/$i.out ${test_folder}$i/config_$i.txt
+    time ${obj} -nb ${test_folder}$i/$i.in ${test_folder}$i/$i.out ${test_folder}$i/config_$i.txt
     echo $ans
 
     ans=`diff ${test_folder}$i/$i.out ${test_folder}$i/$i.ans`
@@ -19,6 +19,7 @@ for ((i = 0; i <= 11; i++)) do
     else
     echo -e "\033[0;31mERROR\033[0m"
     fi
+    echo
     echo
     echo
 done

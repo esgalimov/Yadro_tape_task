@@ -1,11 +1,11 @@
 import random   
 
 
-MIN = -1
-MAX =  1
-CNT =  500_000
+MIN = -1000
+MAX =  1000
+CNT =  50_000
 
-name = "11"
+name = "3"
 
 lis = list()
 

@@ -1,7 +1,9 @@
 #pragma once
-#include "tape.hpp"
+
 #include <vector>
 #include <algorithm>
+#include <cstdio>
+#include "tape.hpp"
 
 namespace tape_sorter {
     namespace cp = config_parser;
@@ -16,13 +18,13 @@ namespace sorter {
 
         std::vector<T> ram_;
 
-        std::time_t rw_tm_, rewind_tm_, shift_tm_;
+        std::size_t rw_tm_, rewind_tm_, shift_tm_;
 
-        std::time_t sort_time_ = 0;
+        std::size_t sort_time_ = 0;
 
         using ram_iter = typename std::vector<T>::iterator;
 
-        void add_time(std::time_t tm) {
+        void add_time(std::size_t tm) {
             sort_time_ += tm;
         }
 
@@ -50,14 +52,12 @@ namespace sorter {
             return start;
         }
 
-        void sort_ram(ram_iter start, ram_iter end) { std::sort(start, end); }
-
         void sort_parts_in_ram() {
             std::size_t i = 0;
             while (!itape_.is_end()) {
                 ram_iter last_loaded = load_tape_into_ram(itape_, ram_.begin(), ram_.end());
 
-                sort_ram(ram_.begin(), last_loaded);
+                 std::sort(ram_.begin(), last_loaded);
 
                 if (i++ % 2 == 0) load_ram_into_tape(tmp_tp_1_, ram_.begin(), last_loaded);
                 else              load_ram_into_tape(tmp_tp_2_, ram_.begin(), last_loaded);
@@ -70,7 +70,7 @@ namespace sorter {
         void sort_little_tape_in_ram() {
             ram_iter last_loaded = load_tape_into_ram(itape_, ram_.begin(), ram_.end());
 
-            sort_ram(ram_.begin(), last_loaded);
+            std::sort(ram_.begin(), last_loaded);
 
             load_ram_into_tape(otape_, ram_.begin(), last_loaded);
         }
@@ -168,8 +168,8 @@ namespace sorter {
                     tmp_tp_1_.write(curr_val);
                     tmp_tp_1_.shift_next();
                     otape_.shift_next();
-
                     prev_val = curr_val;
+                    
                     if (otape_.is_end()) break;
                     curr_val = otape_.read();
                 } while (curr_val >= prev_val);
@@ -181,9 +181,10 @@ namespace sorter {
                     tmp_tp_2_.shift_next();
                     otape_.shift_next();
                     prev_val = curr_val;
+
                     if (otape_.is_end()) break;
                     curr_val = otape_.read();
-                } while (curr_val >= prev_val && !otape_.is_end());
+                } while (curr_val >= prev_val);
             }
 
             tmp_tp_1_.save_pos();
@@ -192,35 +193,30 @@ namespace sorter {
             add_time(3 * rewind_tm_ + 2 * otape_.size() * (rw_tm_ + shift_tm_));
         }
 
-        void generate_tmp_filenames() {
-            tmp_filename_1 = unique_tmp_filename_generator(1);
-            tmp_filename_2 = unique_tmp_filename_generator(2);
-        }
-
     public:
         sorter_t(const std::string& iname, const std::string& oname, cp::config_t config) :
             rw_tm_(config.rw_tm_), rewind_tm_(config.rewind_tm_), shift_tm_(config.shift_tm_) 
         {
             ram_.resize(config.ram_sz_ / sizeof(T));
 
-            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size();
+            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size_error();
 
             std::size_t tape_sz = std::filesystem::file_size(iname);
 
             itape_.init_stream(iname, tape_sz, false);
             otape_.init_stream(oname, tape_sz, false);
 
-            auto tmp_path = std::filesystem::temp_directory_path();
-            generate_tmp_filenames();
+            tmp_filename_1 = std::string(std::tmpnam(nullptr));
+            tmp_filename_2 = std::string(std::tmpnam(nullptr));
 
-            tmp_tp_1_.init_stream(tmp_path / tmp_filename_1, tape_sz);
-            tmp_tp_2_.init_stream(tmp_path / tmp_filename_2, tape_sz);
+            tmp_tp_1_.init_stream(tmp_filename_1, tape_sz);
+            tmp_tp_2_.init_stream(tmp_filename_2, tape_sz);
         }
 
         ~sorter_t() {
             auto tmp_path = std::filesystem::temp_directory_path();
-            std::filesystem::remove(tmp_path / tmp_filename_1);
-            std::filesystem::remove(tmp_path / tmp_filename_2);
+            std::filesystem::remove(tmp_filename_1);
+            std::filesystem::remove(tmp_filename_2);
         }
 
         sorter_t(const sorter_t& sorter)            = delete;
@@ -239,17 +235,17 @@ namespace sorter {
         void set_config(cp::config_t config) {
             ram_.resize(config.ram_sz_ / sizeof(T));
 
-            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size();
-            
+            if (ram_.size() == 0) throw tape_sorter_exceptions::ram_size_error();
+
             rw_tm_     = config.rw_tm_;
             rewind_tm_ = config.rewind_tm_; 
             shift_tm_  = config.shift_tm_;
         }
 
-        std::time_t sort() {
+        std::size_t sort() {
             sort_time_ = 0;
 
-            if (itape_.size() <= 4) return sort_time_;
+            if (itape_.size() <= sizeof(T)) return sort_time_;
 
             else if (itape_.size() < ram_.size()) 
                 sort_little_tape_in_ram();
@@ -260,10 +256,6 @@ namespace sorter {
                 while (!tmp_tp_1_.is_begin() && !tmp_tp_2_.is_begin()) {
                     merge_tmps();
                     load_merged_into_tmps();
-
-                    std::cout << "tmp1 pos = " << tmp_tp_1_.get_pos() << std::endl;
-                    std::cout << "tmp2 pos = " << tmp_tp_2_.get_pos() << std::endl;
-                    std::cout << std::endl;
                 }
                 
                 merge_tmps();

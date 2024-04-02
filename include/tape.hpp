@@ -52,12 +52,12 @@ namespace tape {
 
         void shift_next() {
             if (!is_end()) file_.seekg(T_sz_, std::ios_base::cur);
-            else throw tape_sorter_exceptions::shift_next();
+            else throw tape_sorter_exceptions::shift_next_error();
         }
 
         void shift_prev() {
             if (!is_begin()) file_.seekg(-T_sz_, std::ios_base::cur);
-            else throw tape_sorter_exceptions::shift_prev();
+            else throw tape_sorter_exceptions::shift_prev_error();
         }
 
         std::size_t size() { return sz_; }
@@ -65,10 +65,6 @@ namespace tape {
         void save_pos()  { pos = file_.tellg() / T_sz_; }
 
         bool check_pos() { return pos == file_.tellg() / T_sz_; }
-
-        std::size_t get_pos() { return file_.tellg() / T_sz_; }
-        std::size_t get_saved_pos() { return pos; }
-        bool fail() { return file_.fail(); }
 
         bool is_end()   { return file_.tellg() >= sz_ - T_sz_; }
         bool is_begin() { return file_.tellg() == 0; }

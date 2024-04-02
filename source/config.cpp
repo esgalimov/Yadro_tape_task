@@ -1,7 +1,5 @@
-#include "config.hpp"
 #include <iostream>
-#include <limits>
-#include <random>
+#include "config.hpp"
 #include "exceptions.hpp"
 
 namespace tape_sorter {
@@ -20,7 +18,7 @@ config_t parse_config(const std::string& filename) {
         else if (str == "rewind_time")     config.rewind_tm_ = parse_number(input);
         else if (str == "shift_time")      config.shift_tm_  = parse_number(input);
 
-        else throw tape_sorter_exceptions::config_undefind_symbols();
+        else throw tape_sorter_exceptions::config_undefind_symbols_error();
     }
     return config;
 }
@@ -29,10 +27,10 @@ std::size_t parse_number(std::ifstream& input) {
     long long num = 0;
 
     if (input >> num) 
-        if (num < 0) throw tape_sorter_exceptions::config_values();
+        if (num < 0) throw tape_sorter_exceptions::config_values_error();
         else return num;
 
-    else throw tape_sorter_exceptions::config_number_parsing();
+    else throw tape_sorter_exceptions::config_number_parsing_error();
 }
 } // <--- namespace config_parser
 
@@ -50,7 +48,7 @@ std::string read_to_binary(const std::string& filename) {
         while (input >> num)
             output.write(reinterpret_cast<char*>(&num), sz);
     }
-    else throw tape_sorter_exceptions::reading_to_binary();
+    else throw tape_sorter_exceptions::reading_to_binary_error();
     
     return bin_path;
 }
@@ -76,14 +74,5 @@ void write_output_numan_readable(const std::string& iname, const std::string& on
     }
     else throw std::runtime_error(
         "Error: cannot write ints to human-readble file, input or(and) output failed to open");
-}
-
-std::string unique_tmp_filename_generator(int index) {
-    std::random_device rd;  
-    std::mt19937 gen(rd()); 
-    std::uniform_int_distribution<> distrib(std::numeric_limits<int>::min(), 
-                                            std::numeric_limits<int>::max());
-    
-    return std::to_string(index) + std::string{"tape_task"} + std::to_string(distrib(gen));
 }
 } // <-- namespace tape_sorter

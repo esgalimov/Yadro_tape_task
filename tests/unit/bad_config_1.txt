@@ -1,0 +1,4 @@
+ram_size        4
+read_write_time -2
+rewind_time     10
+shift_time      1

@@ -7,22 +7,22 @@ namespace ts  = tape_sorter;
 namespace tss = tape_sorter::sorter;
 namespace cp  = tape_sorter::config_parser;
 
-int main(int argc, char* argv[]) try {
+int main(int argc, char* argv[]) try {    
     if (argc < 3 || argc > 5) {
         std::cerr << "Error: wrong arguments number" << std::endl;
         return 1;
     }
     std::string input, output, config_file;
 
-    if (argc >= 4 && argv[1] == ts::parameters::bin_mode) {
-        input = argv[2];
-        output = argv[3];
-        std::ofstream{output};
-        if (argc == 5) config_file =  argv[4];
+    if (argc >= 4 && argv[1] == ts::parameters::not_bin_mode) {
+        input  = ts::read_to_binary(argv[2]);
+        output = ts::get_output_bin(argv[3]);
+        if (argc == 5) config_file = argv[4];
     }
     else {
-        input  = ts::read_to_binary(argv[1]);
-        output = ts::get_output_bin(argv[2]);
+        input = argv[1];
+        output = argv[2];
+        std::ofstream{output};
         if (argc == 4) config_file =  argv[3];
     }
 
@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) try {
 
     std::cout << "Total sorting time: " << total_time << std::endl;
 
-    if (argv[1] != ts::parameters::bin_mode) {
-        ts::write_output_numan_readable(output, argv[2]);
+    if (argv[1] == ts::parameters::not_bin_mode) {
+        ts::write_output_numan_readable(output, argv[3]);
     }
 }
 catch (std::exception& exc) {
