@@ -60,7 +60,7 @@ namespace tape {
             else throw tape_sorter_exceptions::shift_prev_error();
         }
 
-        std::size_t size() { return sz_; }
+        std::size_t size() const { return sz_; }
 
         void save_pos()  { pos = file_.tellg() / T_sz_; }
 
